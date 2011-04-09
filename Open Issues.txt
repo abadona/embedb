@@ -1,0 +1,31 @@
+Open issues for BTree
+
+? FLAGS_UNIQUE into FLAGS_DUPLICATE
+### done ### insert and insertAt return ERR_DUPLICATE
+### done, searchNode and insertAt ### who combines key and value for duplicate
+  searchNode, insertAt or upper level
+implement delete
+copy and rotate too complicated
+
+write roadmap for btree code
+
+  BTreeNodeHandler implements most generic methods
+itself, but relies on some functionality of concrete
+subclasses.
+  Next subclass in chain, FixedNodeHandler implements
+fixed unique key, non range value, but do it in a
+way which allows to modify it to support non-unique
+key in class DupKeyNodeHandler by concatenating key
+and value, and support range values by modifying
+procedures of extracting and inserting values into
+the tree.
+  VariableNodeHandler is unfunctional now, but it supposed
+to support variable keys. Probably it is easier and
+more effective to implement Patricia over B-tree,
+kind of Ferragina works for valiable length keys.
+
+
+2002 Sep 20
+Left and right sibling links are not necessary for internal nodes.
+Usually in B+ Tree only right link is used for mutlithreaded
+operations because key can travel into next node.

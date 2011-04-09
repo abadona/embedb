@@ -1,0 +1,42 @@
+Layout of B-tree node
+
+  sig   left right level flags  len  nkeys                    data
+|-----|-----|-----|-----|-----|-----|-----|--------------------------------------------|
+   4     8     8     1     1     4     2  |
+                                          |     keys
+  Fixed key                               |--------------|
+                                          | keylen*nkeys | page refs
+    Internal node                         |              |--------------|
+                                          |              | 8*(nkeys+1)
+                                          |              |
+                                          |              |   values
+    Leaf node (level == 0)                |              |--------------|
+                                          |                vallen*nkeys
+                                          |
+                                          | acc key len       keys
+  Variable key                            |--------------|---------------|
+                                            2*(nkeys+1)    keyslen - last|
+                                                           elt of acc len|
+                                                                         | page refs
+    Internal node                                                        |-------------|
+                                                                         | 8*(nkeys+1)
+                                                                         |
+                                                                         |   values
+    Leaf node (level == 0)                                               |-------------|
+                                                                           vallen*nkeys
+
+  Eight basic layouts for B-tree node exist. They are formed by three independent
+parameters - whether it is a fixed or variable length key index, is it an internal
+or leaf node, and is index uses range coding. Two of them - variable index with
+range coding, both internal and leaf nodes, does not make sense.
+  Two parameters are shown explicitely, while the third - range coding - determines
+vallen (and value layout, which is not shown ). In case of non-range coding, value
+is a 8-byte integer, which is an object id. In case of range coding, value is a 12
+byte structure, which consists of 8-byte recno and 4-byte range.
+  In case of variable keys, an array of accumulated key length is stored, with the
+first element always being 0, and the last (nkeys+1) element being total length of
+all keys. This layout allows for fast finding beginning of each key as well as size
+which is the difference between the beginning of next element and the current one.
+  Each key in internal nodes corresponds to pointer to the pages with keys LESS OR
+EQUAL to this key. That is for leaf node, the largest key in the node is duplicated
+at its parent.
