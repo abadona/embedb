@@ -1,0 +1,9 @@
+btree.idx.0.edb
+Embedb.opt
+Release
+Embedb.ncb
+Debug
+lib
+*.plg
+profile_1M_write_seek.txt
+bintest.cpp
