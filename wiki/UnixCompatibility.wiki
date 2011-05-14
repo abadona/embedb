@@ -1,0 +1,5 @@
+EMBEDB Unix Compatibility:
+
+Today (05/14/2011) the test-level unix compatibility is achieved.
+All tests, including 'BTREE' ones, do work when embedb is built on Linux with gcc 4.5.1 (64-bit). 32-bit unix compatibility is yet to be tested.
+
