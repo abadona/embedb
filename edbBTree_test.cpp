@@ -2,10 +2,14 @@
 #include "edbBTree.h"
 
 #include <time.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <list>
 #include "edbSplitFileFactory.h"
 #include "edbPagedFileFactory.h"
+#include "portability.h"
+#include <cstring>
+#include <iostream>
+
 
 #define TSTDIR "."
 #define TSTNAME "idx"
@@ -70,7 +74,7 @@ void check (const void *key, BTree &bt, key_list_t &l)
     const char *k = (const char *) key;
     for (i = l.begin(); i != l.end(); ++i) {
         if (0 != bt.find(*i, 8, &val, vlen) || (msb64(*i) != val && *((uint64 *)*i) != val))
-          printf ("failed after 0x%02.2x%02.2x%02.2x%02.2x%02.2x%02.2x%02.2x%02.2x: key - 0x%02x%02x%02x%02x%02x%02x%02x%02x, val - %I64d\n",
+          fprintf (stderr, "failed after 0x%02.2x%02.2x%02.2x%02.2x%02.2x%02.2x%02.2x%02.2x: key - 0x%02x%02x%02x%02x%02x%02x%02x%02x, val - %I64d\n",
              k[0], k[1], k[2], k[3], k[4], k[5], k[6], k[7],
              (*i)[0], (*i)[1], (*i)[2], (*i)[3], (*i)[4], (*i)[5], (*i)[6], (*i)[7], val);
     }
@@ -124,18 +128,27 @@ inline void check(const void *key, BTree &bt, KeyValList &l)
     char val[256];
     LenT vlen;
     for (i = l.begin(); i != l.end(); ++i) {
-        try { bt.find((*i).key_, (*i).klen_, val, vlen); }
+        try 
+        { 
+            bt.find ((*i).key_, (*i).klen_, val, vlen); 
+            
+        }
         catch (Error &) {
             int n;
             const unsigned char *k = (const unsigned char *) key;
-            printf ("failed after 0x");
+            // printf ("failed after 0x");
+            stf::cerr << "failed after 0x";
             for (n = 0; n < (*i).klen_; ++n)
-                printf ("%c%c", "0123456789abcdef"[k[n] >> 4], "0123456789abcdef"[k[n] & 0xf]);
-            printf (" at 0x");
+                // ("%c%c", "0123456789abcdef"[k[n] >> 4], "0123456789abcdef"[k[n] & 0xf]);
+                std::cerr << "0123456789abcdef"[k[n] >> 4] << "0123456789abcdef"[k[n] & 0xf];
+            // printf (" at 0x");
+            std::cerr << " at 0x";
             k = (const unsigned char *) (*i).key_;
             for (n = 0; n < (*i).klen_; ++n)
-                printf ("%c%c", "0123456789abcdef"[k[n] >> 4], "0123456789abcdef"[k[n] & 0xf]);
-            printf ("\n");
+                // printf ("%c%c", "0123456789abcdef"[k[n] >> 4], "0123456789abcdef"[k[n] & 0xf]);
+                std::cerr << "0123456789abcdef"[k[n] >> 4] << "0123456789abcdef"[k[n] & 0xf] 
+            // printf ("\n");
+            std::cerr << std::endl;
         }
     }
 }
@@ -156,7 +169,8 @@ bool testInsert (BTree &bt, uint32 flags, uint64 overstep)
     uint64 insFirst, insLast;
     time_t tbeg = time (0);
     time_t insertTime;
-    for (uint64 i = 0; i < lim; ++i) {
+    uint64 i;
+    for (i = 0; i < lim; ++i) {
         uint64 key, val;
         if (0 == overstep) val = msb64 (i);
         else val = msb64 (i/overstep + i);
@@ -165,7 +179,8 @@ bool testInsert (BTree &bt, uint32 flags, uint64 overstep)
         try { bt.insert (&key, sizeof (key), &val, sizeof (val)); }
         catch (Error &) {
             if (!failed) {
-                printf ("insert failure at %I64d\n", i);
+                // printf ("insert failure at %I64d\n", i);
+                std::cerr << "insert failure at " << i << std::endl;
                 insFirst = i;
             }
             insLast = i;
@@ -174,12 +189,15 @@ bool testInsert (BTree &bt, uint32 flags, uint64 overstep)
         insert(check_list, &key, sizeof (key), &val, sizeof (val));
         check(&key, bt, check_list);
         if (i % report == 0)
-            printf ("%I64d, elapsed %d\r", i, time(0)-tbeg);
+            // printf ("%I64d, elapsed %d\r", i, time(0)-tbeg);
+            std::cerr << i << ", elapsed " << time(0)-tbeg << "\r";
     }
     insertTime = time(0)-tbeg;
-    printf ("%I64d, elapsed %d\n", i, insertTime);
+    // printf ("%I64d, elapsed %d\n", i, insertTime);
+    std::cerr << i << ", elapsed " << insertTime << std::endl;
     if (failed)
-        printf ("Insert failed first %I64d, last %I64d\n", insFirst, insLast);
+        // printf ("Insert failed first %I64d, last %I64d\n", insFirst, insLast);
+        std::cerr << "Insert failed first " << insFirst << ", last " << insLast << std::endl;
     return !failed;
 }
 
@@ -192,7 +210,8 @@ bool testSelect (BTree &bt, uint32 flags, uint64 overstep)
     uint64 lim1;
     if (BTREE_FLAGS_DUPLICATE == flags) lim1 = lim / 2;
     else lim1 = lim;
-    for (uint64 i = 0; i < lim1; ++i) {
+    uint64 i = 0;
+    for (; i < lim1; ++i) {
         uint64 key;
         key = msb64 (i);
         uint64 val; LenT vlen;
@@ -206,7 +225,8 @@ bool testSelect (BTree &bt, uint32 flags, uint64 overstep)
             oops = true;
         }
         catch (BadParameters &e) {
-            printf("bad parameters %s\n", (const char *) e);
+            // printf("bad parameters %s\n", (const char *) e);
+            std::cerr << "bad parameters " << (const char *) e << std::endl;
         }
         catch (Error &) {
             oops = true;
@@ -217,23 +237,29 @@ bool testSelect (BTree &bt, uint32 flags, uint64 overstep)
             if (!failed) {
                 if (oops) {
                     if (panic) 
-                        printf ("something wrong at %I64d\n", i);
+                        // printf ("something wrong at %I64d\n", i);
+                        std::cerr << "something wrong at " << i << std::endl;
                     else
-                        printf ("not found at %I64d\n", i);
+                        // printf ("not found at %I64d\n", i);
+                        std::cerr << "not found at " << i << std::endl;
                 } else
-                    printf ("value mismatch %I64d - %I64d\n", i, msb64(val));
+                    // printf ("value mismatch %I64d - %I64d\n", i, msb64(val));
+                    std::cerr << "value mismatch " << i << " - " << msb64(val) << std::endl;
                 nfFirst = i;
             }
             nfLast = i;
             failed = true;
         }
         if (i % report == 0)
-            printf ("%I64d, elapsed %d\r", i, time(0)-tbeg);
+            // printf ("%I64d, elapsed %d\r", i, time(0)-tbeg);
+            std::cerr << i << ", elapsed " << time(0)-tbeg << std::endl;
     }
     selectTime = time(0)-tbeg;
-    printf ("%I64d, elapsed %d\n", i, selectTime);
+    // printf ("%I64d, elapsed %d\n", i, selectTime);
+    std::cerr << i  << ", elapsed " << selectTime << std::endl;
     if (failed)
-        printf ("Not found first %I64d, last %I64d\n", nfFirst, nfLast);
+        // printf ("Not found first %I64d, last %I64d\n", nfFirst, nfLast);
+        std::cerr << "Not found first " << nfFirst << ", last " << nfLast << std::endl;
     return !failed;
 }
 
@@ -295,7 +321,8 @@ bool testCursor (BTree &bt, uint32 flags, uint64 overstep)
     uint16 len = 8;
     while (bt.fetch(cur, key, len)) ++cnt;
     time_t tlps = time (0) - tbeg;
-    printf ("Fetched %I64d, elapsed %d\n", cnt, tlps);
+    // printf ("Fetched %I64d, elapsed %d\n", cnt, tlps);
+    std::cerr << "Fetched " << cnt << ", elapsed " << tlps << std::endl;
     return !failed;
 }
 
@@ -314,16 +341,19 @@ bool testRemove(BTree &bt, uint32 flags, uint64 overstep)
     // UntilTheEnd qry(myKey, sizeof(myKey));
     // WhileSameKey qry(myKey, sizeof(myKey));
     uint64 pos = bt.getpos(endKey, sizeof(endKey), 0, 0, BTREE_EXACT);
-    printf("Pos: %I64d\n", pos);
+    // printf("Pos: %I64d\n", pos);
+    std::cerr << "Pos: " << pos << std::endl;
     NKeys qry(myKey, sizeof(myKey),101);
     BTreeCursor cur;
     bt.initcursor(cur, qry);
     int res;
     res = bt.remove(cur);
     time_t tlps = time (0) - tbeg;
-    printf ("Remove result is %d\nElasped %d\n", res, tlps);
+    // printf ("Remove result is %d\nElasped %d\n", res, tlps);
+    std::cerr << "Remove result is " << res << "\nnElasped " << tlps << std::endl;
     pos = bt.getpos(endKey, sizeof(endKey), 0, 0, BTREE_EXACT);
-    printf("Pos: %I64d\n", pos);
+    // printf("Pos: %I64d\n", pos);
+    std::cerr << "Pos: " << pos << std::endl;
     return BTREE_OK == res;
 }
 
@@ -331,7 +361,8 @@ bool testDriver (const char *testName, uint32 flags)
 {
     BTree bt;
 
-    printf ("%s\n", testName);
+    // printf ("%s\n", testName);
+    std::cerr << testName << std::endl;
     // Erase old files if it exists
     if (splitFileFactory.exists (TSTDIR, TSTNAME))
         splitFileFactory.erase (TSTDIR, TSTNAME);
@@ -349,7 +380,7 @@ bool testDriver (const char *testName, uint32 flags)
         succ = succ && testRemove(bt, flags, overstep);
         testSelect(bt, flags, overstep);
     } else {
-        fprintf (stderr, "Can not init btree over file, checkpoint %d\n", bt.getCheckPoint());
+        std::cerr << "Can not init btree over file, checkpoint " << bt.getCheckPoint() << std::endl;
     }
     
 
@@ -376,7 +407,8 @@ bool testDupBadKey ()
 {
     BTree bt;
 
-    printf ("DupBadKey\n");
+    // printf ("DupBadKey\n");
+    std::cerr << "DupBadKey" << std::endl;
     // Erase old files if it exists
     if (splitFileFactory.exists (TSTDIR, TSTNAME))
         splitFileFactory.erase (TSTDIR, TSTNAME);
@@ -400,7 +432,9 @@ bool testDupBadKey ()
             }
             int res = bt.insert (&key, sizeof (key), &val, sizeof (val));
             if (i % report == 0)
-                printf ("%I64d, elapsed %d\r", i, time(0)-tbeg);
+                // printf ("%I64d, elapsed %d\r", i, time(0)-tbeg);
+                std::cerr << i << ", elapsed " << time(0)-tbeg << "\r";
+            
             if (BTREE_OK == res && (key << 1) == i) {
                 res = bt.find (&key, sizeof (key), &val1, vlen);
                 if (BTREE_OK == res && !failed) failed = msb64(val1) / 2 != i;
@@ -410,14 +444,16 @@ bool testDupBadKey ()
                 res = bt.find (&key, sizeof (key), &val1, vlen);
                 if (BTREE_OK != res) {
                     if (!failed) {
-                        printf ("badkey can not be retrieved at %I64d\n", i);
+                        // printf ("badkey can not be retrieved at %I64d\n", i);
+                        std::cerr << "badkey can not be retrieved at " << i << std::endl;
                         insFirst = i;
                     }
                     insLast = i;
                     failed = true;
                 } else if (msb64(val1) / 2 != badkey) {
                     if (!failed) {
-                        printf ("badkey mismatch at %I64d\n", i);
+                        // printf ("badkey mismatch at %I64d\n", i);
+                        std::cerr << "badkey mismatch at " << i << std::endl;
                         insFirst = i;
                     }
                     insLast = i;
@@ -426,7 +462,8 @@ bool testDupBadKey ()
             }
             if (BTREE_OK != res) {
                 if (!failed) {
-                    printf ("insert failure at %I64d\n", i);
+                    // printf ("insert failure at %I64d\n", i);
+                    std::cerr << "insert failure at " << i << std::endl;
                     insFirst = i;
                 }
                 insLast = i;
@@ -434,12 +471,15 @@ bool testDupBadKey ()
             }
         }
         insertTime = time(0)-tbeg;
-        printf ("%I64d, elapsed %d\n", i, insertTime);
+        // printf ("%I64d, elapsed %d\n", i, insertTime);
+        std::cerr << i << ", elapsed " << insertTime << std::endl;
         if (failed)
-            printf ("Insert failed first %I64d, last %I64d\n", insFirst, insLast);
+            // printf ("Insert failed first %I64d, last %I64d\n", insFirst, insLast);
+            std::cerr << "Insert failed first " << insFirst << ", last " << insLast << std::endl;
         succ = !failed;
     } else {
-        fprintf (stderr, "Can not init btree over file, checkpoint %d\n", bt.getCheckPoint());
+        // fprintf (stderr, "Can not init btree over file, checkpoint %d\n", bt.getCheckPoint());
+        std::cerr << "Can not init btree over file, checkpoint " << bt.getCheckPoint() << std::endl;
     }
 
     // Close files

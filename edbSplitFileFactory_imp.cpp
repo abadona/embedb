@@ -2,7 +2,7 @@
 #define splitFileFactory_defined
 #include "edbSplitFile_imp.h"
 #include "edbExceptions.h"
-#include <io.h>
+//#include <io.h>
 #include <errno.h>
 #include <iterator>
 
@@ -11,6 +11,8 @@ namespace edb
 
 static SplitFileFactory_imp theFileFactory;
 FileFactory& splitFileFactory = theFileFactory;
+
+static const unsigned MAXBUF = 4096;
 
 File& SplitFileFactory_imp::open (const char* directory, const char* basename)
 {
@@ -40,8 +42,9 @@ bool SplitFileFactory_imp::exists (const char* directory, const char* basename)
     SplitFile_imp f (directory, basename);
 
     // try to open
-    const char* name = name4number (f.base_name_.c_str (), 0);
-    
+    char name [MAXBUF];
+    name4number (f.base_name_.c_str (), 0, name, MAXBUF);
+
     Fid fid = fileHandleMgr.open (name);
     if (fid != -1)
     {
@@ -54,15 +57,15 @@ bool SplitFileFactory_imp::exists (const char* directory, const char* basename)
 bool SplitFileFactory_imp::erase (const char* directory, const char* basename)	
 {
     bool toR = false;
-    
     // create the File object
     SplitFile_imp f (directory, basename);
 
     // try to open
     int fno = 0;
+    char name [MAXBUF];
     while (1)
     {
-        const char* name = name4number (f.base_name_.c_str (), fno);
+        name4number (f.base_name_.c_str (), fno, name, MAXBUF);
         if (::unlink (name) != 0)
         {
             if (errno == ENOENT)

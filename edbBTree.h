@@ -121,8 +121,8 @@ public:
         return true;
     }
 protected:
-    friend BTreeNodeHandler; // remote friendship!
-    friend BTree;
+    friend class BTreeNodeHandler; // remote friendship!
+    friend class BTree;
     int len () const { return len_; }
     int match_;
     bool forward_;
@@ -205,8 +205,8 @@ public:
     BTreeCursor ();
     ~BTreeCursor ();
 //protected:
-    friend BTree;
-    friend BTreeNodeHandler; // remote friendship!
+    friend class BTree;
+    friend class BTreeNodeHandler; // remote friendship!
     uint64          pos_;
     BTreeQueryBase *qry_;
     bool            fInit_;

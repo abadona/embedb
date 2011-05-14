@@ -6,11 +6,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h>
-//#include <iostream>
-//#include <iomanip>
-//#include "i64out.h"
+// #include <conio.h>
+#include <iostream>
+#include <iomanip>
+#include "i64out.h"
 #include <set>
+
+#include "portability.h"
 
 
 
@@ -68,8 +70,8 @@ static bool opTest ()
     }
     VStorage& vs = *vsp;
 
-    printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
-    // std::cout << "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
+    // printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    std::cerr << "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
 
     char* buf = new char [LARGERECMAX + 2*sizeof (RecLocator) + sizeof (RecLen)];
     std::set <RecLocator> rls;
@@ -83,10 +85,10 @@ static bool opTest ()
 
     while (1)
     {
-        if (kbhit ())
-            if (getch () == 27)
-                break;
-        
+//        if (kbhit ())
+//            if (getch () == 27)
+//                break;
+
         int allocno = rand () % MXROW+1;
         int delno = rand () % MXROW+1;
         int readno = rand () % MXROW+1;
@@ -100,10 +102,10 @@ static bool opTest ()
             totallocs ++;
             if (totallocs % REPORTINT == 0)
             {
-                printf ("N Alloc : ");
-                printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
-                printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
-                // std::cout << "N Alloc : " << std::setw (9) << totallocs << ", Frees : " << std::setw (9) << totfrees << ", Reads : " << std::setw (9) << totreads << ", Reallocs : " << std::setw (9) << totreallocs << ", usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
+                //printf ("N Alloc : ");
+                //printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
+                //printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                std::cout << "N Alloc : " << std::setw (9) << totallocs << ", Frees : " << std::setw (9) << totfrees << ", Reads : " << std::setw (9) << totreads << ", Reallocs : " << std::setw (9) << totreallocs << ", usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
             }
             *(RecLocator*) buf = a;
             *(RecLen*) (buf + sizeof (RecLocator)) = rlen;
@@ -127,16 +129,18 @@ static bool opTest ()
                 dels [delcnt ++] = (*itr);
                 itr ++;
         }
-        for (int d = 0; d < delcnt; d ++)
+        int d;
+        for (d = 0; d < delcnt; d ++)
         {
             vs.freeRec (dels [d]);
             rls.erase (dels [d]);
             totfrees ++;
             if (totfrees % REPORTINT == 0)
             {
-                printf ("N Free : ");
-                printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
-                printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                //printf ("N Free : ");
+                //printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
+                //printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                std::cout << "N Free : " << std::setw (9) << totallocs << ", Frees : " << std::setw (9) << totfrees << ", Reads : " << std::setw (9) << totreads << ", Reallocs : " << std::setw (9) << totreallocs << ", usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
             }
         }
 
@@ -165,9 +169,10 @@ static bool opTest ()
             totreallocs ++;
             if (totreallocs % REPORTINT == 0)
             {
-                printf ("N Realloc : ");
-                printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
-                printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                //printf ("N Realloc : ");
+                //printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
+                //printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                std::cout << "N Realloc : " << std::setw (9) << totallocs << ", Frees : " << std::setw (9) << totfrees << ", Reads : " << std::setw (9) << totreads << ", Reallocs : " << std::setw (9) << totreallocs << ", usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
             }
 
             *(RecLocator*) buf = newLocator;
@@ -207,9 +212,10 @@ static bool opTest ()
             totreads ++;
             if (totreads % REPORTINT == 0)
             {
-                printf ("N Read : ");
-                printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
-                printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                //printf ("N Read : ");
+                //printf ("%I64d, Frees: %I64d, Reads: %I64d, Reallocs: %I64d, ", totallocs, totfrees, totreads, totreallocs);
+                //printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+                std::cout << "N Read : " << std::setw (9) << totallocs << ", Frees : " << std::setw (9) << totfrees << ", Reads : " << std::setw (9) << totreads << ", Reallocs : " << std::setw (9) << totreallocs << ", usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << "\n";
             }
         }
 // #endif
@@ -239,20 +245,20 @@ static bool reallocTest ()
 
     RecLocator nrl1 = vs.reallocRec (rl1, ALSZ+INCR1);
 
-    //std::cout << "Reallocated 1 (locator "<<rl1<<" ,size "<<ALSZ<<") to size "<<ALSZ+INCR1<<", newLocator "<<nrl1<<std::endl;
-    //std::cout <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
+    std::cerr << "Reallocated 1 (locator "<<rl1<<" ,size "<<ALSZ<<") to size "<<ALSZ+INCR1<<", newLocator "<<nrl1<<std::endl;
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     RecLocator nrl4 = vs.reallocRec (rl4, ALSZ+INCR1);
-    //std::cout << "Reallocated 4 (locator "<<rl4<<" ,size "<<ALSZ<<") to size "<<ALSZ+INCR1<<", newLocator "<<nrl4<<std::endl;
-    //std::cout <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
+    std::cerr << "Reallocated 4 (locator "<<rl4<<" ,size "<<ALSZ<<") to size "<<ALSZ+INCR1<<", newLocator "<<nrl4<<std::endl;
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     RecLocator nrl3 = vs.reallocRec (rl3, ALSZ+INCR1);
-    //std::cout << "Reallocated 3 (locator "<<rl3<<" ,size "<<ALSZ<<") to size "<<ALSZ+INCR1<<", newLocator "<<nrl3<<std::endl;
-    //std::cout <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
+    std::cerr << "Reallocated 3 (locator "<<rl3<<" ,size "<<ALSZ<<") to size "<<ALSZ+INCR1<<", newLocator "<<nrl3<<std::endl;
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     RecLocator nnrl1 = vs.reallocRec (nrl1, ALSZ+INCR1+INCR2);
-    //std::cout << "Reallocated 1 (locator "<<nrl1<<" ,size "<<ALSZ+INCR1<<") to size "<<ALSZ+INCR1+INCR2<<", newLocator "<<nnrl1<<std::endl;
-    //std::cout <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
+    std::cerr << "Reallocated 1 (locator "<<nrl1<<" ,size "<<ALSZ+INCR1<<") to size "<<ALSZ+INCR1+INCR2<<", newLocator "<<nnrl1<<std::endl;
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     RecLocator nnrl12 = vs.reallocRec (nrl1, ALSZ);
 
@@ -274,12 +280,12 @@ bool casesTest ()
 
     // test allocation
     RecLocator rl1 = vs.allocRec (ALSZ);
-    //std::cout << "Allocated 1 (locator "<<rl1<<" ,size "<<ALSZ<<std::endl;
-    //std::cout <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
+    std::cerr << "Allocated 1 (locator "<<rl1<<" ,size "<<ALSZ<<std::endl;
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     vs.freeRec (rl1);
-    //std::cout << "Freed 1 (locator "<<rl1<<" ,size "<<ALSZ<<std::endl;
-    //std::cout <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
+    std::cerr << "Freed 1 (locator "<<rl1<<" ,size "<<ALSZ<<std::endl;
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
 
     vs.close ();
@@ -292,17 +298,20 @@ bool readTest ()
     VStorage* vsp;
     if (!splitFileFactory.exists (tstd, tstn))
     {
-        printf ("No file found. Nothing to check.\n");
+        // printf ("No file found. Nothing to check.\n");
+        std::cerr << "No file found. Nothing to check." << std::endl;
     }
     else
     {
         fp = &splitFileFactory.open (tstd, tstn);
         File& cf = cachedFileFactory.wrap (*fp);
         vsp = &vStorageFactory.wrap (cf);
-        printf ("Existing file opened:\n");
+        // printf ("Existing file opened:\n");
+        std::cerr << "Existing file opened" << std::endl;
     }
     VStorage& vs = *vsp;
-    printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    // printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
 
     VRecDescriptor vrd;
@@ -320,7 +329,8 @@ bool readTest ()
         if (cloc != vrd.locator_) 
             ERR("Second Locator");
         if (currno % REPORTINT == 0)
-            printf ("%I64d\r", currno);
+            // printf ("%I64d\r", currno);
+            std::cerr << currno << "\r";
         currno ++;
     }
     while (vs.nextRec (vrd));
@@ -334,17 +344,20 @@ bool delTest ()
     VStorage* vsp;
     if (!splitFileFactory.exists (tstd, tstn))
     {
-        printf ("No file found. Nothing to check.\n");
+        // printf ("No file found. Nothing to check.\n");
+        std::cerr << "No file found. Nothing to check." << std::endl;
     }
     else
     {
         fp = &splitFileFactory.open (tstd, tstn);
         File& cf = cachedFileFactory.wrap (*fp);
         vsp = &vStorageFactory.wrap (cf);
-        printf ("Existing file opened:\n");
+        //printf ("Existing file opened:\n");
+        std::cerr << "Existing file opened:" << std::endl;
     }
     VStorage& vs = *vsp;
-    printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    // printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     std::set <RecLocator> locset;
 
@@ -354,19 +367,21 @@ bool delTest ()
     {
         locset.insert (vrd.locator_);
         if (currno % REPORTINT == 0)
-            printf ("Marked for delete %I64d\r", currno);
+            // printf ("Marked for delete %I64d\r", currno);
+            std::cerr << "Marked for delete " <<  currno << std::endl;
         currno ++;
     }
     while (vs.nextRec (vrd));
 
-    printf ("\n");
+    // printf ("\n");
+    std::cerr << std::endl;
     currno = 0;
     std::set<RecLocator>::iterator itr = locset.begin ();
     while (itr != locset.end ())
     {
         vs.freeRec (*itr);
         if (currno % REPORTINT == 0)
-            printf ("Deleted %I64d\r", currno);
+            std::cerr << "Deleted " << currno << std::endl;
         currno ++;
         itr ++;
     }
@@ -384,26 +399,28 @@ bool allocTest ()
         fp = &splitFileFactory.open (tstd, tstn);
         File& cf = cachedFileFactory.wrap (*fp);
         vsp = &vStorageFactory.wrap (cf);
-        printf ("Existing file opened:\n");
+        // printf ("Existing file opened:\n");
+        std::cerr << "Existing file opened:" << std::endl;
     }
     else
     {
         fp = &splitFileFactory.create (tstd, tstn);
         File& cf = cachedFileFactory.wrap (*fp);
         vsp = &vStorageFactory.init (cf);
-        printf ("New file created:\n");
+        std::cerr << "New file created:" << std::endl;
     }
     VStorage& vs = *vsp;
 
-    printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    // printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
 
     int totallocs = 0;
     while (1)
     {
-        if (kbhit ())
-            if (getch () == 27)
-                break;
-        
+//        if (kbhit ())
+//            if (getch () == 27)
+//                break;
+
         int allocno = 100;
 
         // allocate some
@@ -413,14 +430,16 @@ bool allocTest ()
             RecLocator a = vs.allocRec (rlen);
             totallocs ++;
             if (totallocs % REPORTINT == 0)
-                printf ("Alloc : %I64d\r", totallocs);
+                // printf ("Alloc : %I64d\r", totallocs);
+                std::cerr << "Alloc : " << totallocs << "\r";
 
             vs.writeRec (a, &a, sizeof (a));
             vs.writeRec (a, &rlen, sizeof (rlen), sizeof (a));
             vs.writeRec (a, &a, sizeof (a), rlen - sizeof (RecLocator));
         }
     }
-    printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    // printf ("usedCount : %9I64d, usedSpace : %9I64d, freeCount : %9I64d, freeSpace %9I64d\n", vs.usedCount (), vs.usedSpace (), vs.freeCount (), vs.freeSpace ());
+    std::cerr <<     "usedCount : " << std::setw (9) << vs.usedCount () << ", usedSpace : " << std::setw (9) << vs.usedSpace () << ", freeCount : " << std::setw (9) << vs.freeCount () << ", freeSpace : " << std::setw (9) << vs.freeSpace () << std::endl;
     vs.close ();
     return true;
 }

@@ -18,18 +18,18 @@ protected:
     {
         PageKey (File& f, uint64 page) : file_ (&f), page_ (page) {}
         bool operator < (const PageKey& pk) const 
-        { 
+        {
             return (file_ == pk.file_) ? (page_ < pk.page_) : (file_ < pk.file_); 
         }
         bool operator == (const PageKey& pk) const 
-        { 
+        {
             return (file_ == pk.file_) && (page_ == pk.page_); 
         }
         File*   file_;
         uint64  page_;
     };
-    
-	typedef std::map <PageKey, uint32> Pkeymap;
+
+    typedef std::map <PageKey, uint32> Pkeymap;
 
     struct Page
     {
@@ -56,7 +56,7 @@ protected:
     uint32*     hlpbuf_;        // buffer to hold temporary sets of pageidxses (for deletes) - to avoid heap allocs/frees
     FilePos     last_dumped_;   // the previous page written to a disk (for non-continous dumps counting)
     uint64      cur_pageuse_;   // page use counter
-    
+
     uint32      pagesize_;      // size of the page
     uint32      poolsize_;      // size of the pages pool (in number of pages)
 
@@ -80,7 +80,7 @@ protected:
     void        addmaster_  (uint32 slotidx);   // adds (allready marked as used) slot to the master lists: addrmap_ and mrulist_
     void        removemaster_ (uint32 slotidx); // removes slot from the master lists: addrmap_ and mrulist_
 
-    void        dump_       (uint32 slotidx);   // if slotrange dirty, writes the contents to file and clears dirty state
+    void        dump_       (uint32 slotidx);   // if slotrange is dirty, writes the contents to file and clears dirty state
     void        dumpslots_  (uint32 slotidx, uint32 count); // unconditionally writes the contents of slots to file
     void        free_       (uint32 slotidx);   // removes the slotrange from all referring lists and returns to free storage
     void        freeslot_   (uint32 slotidx);   // unconditionally removes the slot from all referring lists if any and returns to free storage
@@ -100,8 +100,8 @@ protected:
     uint32      fetch_      (File& file, FilePos pageno, uint32 count); // fetches the page(s), returns data address
     uint32      fake_       (File& file, FilePos pageno, uint32 count); // fake-fetches the page(s), returns data address
     uint32      allocate_   (uint32 count, uint32 preserved_count = 0); // allocates the count continous slots. Uses ((free or LRU) + longest dump + not-locked + not-preserved) strategy 
-                            // the preserved slots are those which indexes are stored in hlpbuf_; their number is preserved_count
-    void        makerange_ (uint32 slotidx, uint32 count); // turns the range into the slotrange, mastered by slot slotno.
+                                                                        // the preserved slots are those which indexes are stored in hlpbuf_; their number is preserved_count
+    void        makerange_  (uint32 slotidx, uint32 count); // turns the range into the slotrange, mastered by slot slotno.
 
 
     // strategy methods
@@ -110,10 +110,10 @@ protected:
     AVAIL       check_avail_left_ (uint32 slotidx, uint32 count, uint32 preserved_count, uint64& weight); // checks whether the slot has count of unlocked and not preserved slots left to itself
                                 // the preserved slots of the number preserved_count are stored in hlpbuf
                                 // calculates preference weight for this slot use
-    Pkeymap::iterator dump_len_ (uint32 slotidx, uint32& length); // checks how many pages could be dumped at once around the one in passed slot. Checks at most LONG_ENOUGH_SEQ slots
+    Pkeymap::iterator 
+                dump_len_   (uint32 slotidx, uint32& length); // checks how many pages could be dumped at once around the one in passed slot. Checks at most LONG_ENOUGH_SEQ slots
     void        dumpx_      (Pkeymap::iterator begin);  // dumps the row of pages following the one referred by begin - until the 'end of file' or too long gap is found
-                
-                Pager_imp (uint32 pagesize, uint32 poolsize);
+                Pager_imp   (uint32 pagesize, uint32 poolsize);
 
 public:
                 ~Pager_imp  ();

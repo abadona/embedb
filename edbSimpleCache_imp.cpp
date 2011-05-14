@@ -3,6 +3,7 @@
 
 #include "edbSimpleCache_imp.h"
 #include "edbThePagerMgr.h"
+#include <string.h>
 
 namespace edb
 {

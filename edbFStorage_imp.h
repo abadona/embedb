@@ -5,6 +5,8 @@
 #include "edbTypes.h"
 #include "edbFStorage.h"
 
+#include <string.h>
+
 // Layout of the FixedLengthStorage file:
 // --- BEGIN OF FILE ---
 // signature    sizeof (FileSignature)

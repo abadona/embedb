@@ -6,6 +6,7 @@
 #include "edbFile.h"
 #include "edbVStorage.h"
 #include <vector>
+#include <string.h>
 
 namespace edb
 {

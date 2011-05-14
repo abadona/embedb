@@ -1,12 +1,13 @@
 // Copyright 2001 Victor Joukov, Denis Kaznadzey
 #include "edbSplitFile_imp.h"
 #include "edbExceptions.h"
-//#include <strstream>
-#include <io.h>
+#include <sstream>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stddef.h>
+#include "portability.h"
 
 #ifdef _WIN32
 #define PATH_SPLIT_SYM "\\"
@@ -33,16 +34,21 @@ inline int32 fileOff (FilePos offset)
 }
 
 
-const char* name4number (const char* base_name, int32 number)
+void name4number (const char* base_name, int32 number, char* buffer, unsigned buflen)
 {
-    char ibuf [64];
-    static std::string last_created_name_;
-    last_created_name_ = base_name;
-    last_created_name_ += ".";
-    last_created_name_ += itoa (number, ibuf, 10);
-    last_created_name_ += ".edb";
-    return last_created_name_.c_str ();
+    std::ostringstream created_name;
+    created_name.str ("");
+    created_name << base_name
+    <<  "."
+    << number
+    << ".edb";
+    const std::string& t = created_name.str ();
+    strncpy (buffer, t.c_str (), buflen-1);
+    if (t.length () > buflen - 1)
+        buffer [buflen - 1] = 0;
 }
+
+static const unsigned MAXBUF = 2048;
 
 bool SplitFile_imp::open ()
 {
@@ -51,14 +57,15 @@ bool SplitFile_imp::open ()
     long len = 0;
     while (1)
     {
-        const char* name = name4number (base_name_.c_str (), file_number);
+        char name [MAXBUF];
+        name4number (base_name_.c_str (), file_number, name, MAXBUF);
         Fid fid = fileHandleMgr.open (name);
         if (fid != -1)
         {
             if (file_number > 0 && len != SPLIT_FACTOR) throw FileStructureCorrupt ();
             fids_.push_back (fid);
             int h = fileHandleMgr.handle (fid);
-            len = ::_filelength (h);
+            len = ::sci_filelength (h);
             length_ += len;
         }
         else
@@ -72,7 +79,8 @@ bool SplitFile_imp::open ()
 bool SplitFile_imp::create ()
 {
     // make sure there is no file with the name
-    const char* name = name4number (base_name_.c_str (), 0);
+    char name [MAXBUF];
+    name4number (base_name_.c_str (), 0, name, MAXBUF);
     Fid fid = fileHandleMgr.open (name);
     if (fid != -1)
     {
@@ -149,14 +157,14 @@ BufLen SplitFile_imp::read (void* buf, BufLen byteno)
         long rdpos = -1;
         if (fno != first_file || !cpsync_)
         {
-            rdpos  = ::_lseek (h, start, SEEK_SET);
+            rdpos  = ::sci_lseek (h, start, SEEK_SET);
             if (rdpos != start) ERR ("Seek(for read) error")
         }
         // if request is to read beyond the eof, do not (read zero bytes)
         if (end > start)
         {
             int32 len   = end - start;
-            int rdlen = ::_read (h, ((char*) buf) + curpos, len);
+            int rdlen = ::sci_read (h, ((char*) buf) + curpos, len);
             if (rdlen != len) ERR("Read error");
             curpos += len;
         }
@@ -193,7 +201,8 @@ BufLen SplitFile_imp::write (const void* buf, BufLen byteno)
             Fid fid;
             if (newFno >= fids_.size ())
             {
-                const char* new_name = name4number (base_name_.c_str (), newFno);
+                char new_name [MAXBUF];
+                name4number (base_name_.c_str (), newFno, new_name, MAXBUF);
                 fid = fileHandleMgr.create (new_name);
                 if (fid == -1) throw CreateError ();
                 fids_.push_back (fid);
@@ -202,7 +211,7 @@ BufLen SplitFile_imp::write (const void* buf, BufLen byteno)
                 fid = fids_ [newFno];
             if (newFno < fno)
             {
-                if (::_chsize (fileHandleMgr.handle (fid), SPLIT_FACTOR) != 0)
+                if (::sci_chsize (fileHandleMgr.handle (fid), SPLIT_FACTOR) != 0)
                 {
                     if (errno == ENOSPC) throw NoDeviceSpace ();
                     else ERR("Unable to enlarge file");
@@ -212,10 +221,10 @@ BufLen SplitFile_imp::write (const void* buf, BufLen byteno)
         int h = fileHandleMgr.handle (fids_ [fno]);
         if (fno != last_file_before || !cpsync_)
         {
-            long wrpos  = ::_lseek (h, start, SEEK_SET);
+            long wrpos  = ::sci_lseek (h, start, SEEK_SET);
             if (wrpos != start) ERR ("Seek(for write) error")
         }
-        int wrlen = ::_write (h, ((char*) buf) + curpos, len);
+        int wrlen = ::sci_write (h, ((char*) buf) + curpos, len);
         if (wrlen != len) ERR("Write error");
         curpos += len;
     }
@@ -270,14 +279,15 @@ bool SplitFile_imp::chsize (FilePos newLength)
         {
             if (fileno >= cur_no_of_files)
             {
-                const char* new_name = name4number (base_name_.c_str (), fileno);
+                char new_name [MAXBUF];
+                name4number (base_name_.c_str (), fileno, new_name, MAXBUF);
                 Fid fid = fileHandleMgr.create (new_name);
                 if (fid == -1) throw CreateError ();
                 fids_.push_back (fid);
             }
             int h = fileHandleMgr.handle (fids_[fileno]);
             int32 newsize = (fileno == new_last_file)?last_file_size:SPLIT_FACTOR;
-            if (::_chsize (h, newsize) != 0)
+            if (::sci_chsize (h, newsize) != 0)
             {
                 if (errno == ENOSPC) throw NoDeviceSpace ();
                 else ERR("Unable to enlarge file");
@@ -290,12 +300,13 @@ bool SplitFile_imp::chsize (FilePos newLength)
         {
             Fid fid = fids_[fileno];
             fileHandleMgr.close (fid);
-            const char* name = name4number (base_name_.c_str (), fileno);
+            char name [MAXBUF];
+            name4number (base_name_.c_str (), fileno, name, MAXBUF);
             ::unlink (name);
             fids_.pop_back ();
         }
         int h = fileHandleMgr.handle (fids_[new_last_file]);
-        if (::_chsize (h, last_file_size) != 0) ERR("Unable to truncate file");
+        if (::sci_chsize (h, last_file_size) != 0) ERR("Unable to truncate file");
     }
     length_ = newLength;
     cpsync_ = false; // not always, but we want to be on the safe side

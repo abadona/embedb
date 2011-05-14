@@ -3,6 +3,7 @@
 #include "edbPager_imp.h"
 #include "edbExceptions.h"
 #include <vector>
+#include <string.h>
 
 //#define PAGER_IMP_DEBUG                                                
 
@@ -28,8 +29,8 @@ namespace edb
 #define FAVOR_MIN_WRITE_VOLUME
 // #define FAVOR_LONG_DUMPS
 static const uint32 MEM_PAGE_SIZE = 0x1000; // 4 Kb
-    
-    
+
+
 static PagerFactory_imp theFactory;
 PagerFactory& pagerFactory = theFactory;
 
@@ -760,9 +761,8 @@ void Pager_imp::init_ (uint32 pagesize, uint32 poolsize)
     if (!pages_) ERR("Not enough memory for page pool");
     // allocate paged memory arena
     arenabuf_ = new char [poolsize_*pagesize_ + MEM_PAGE_SIZE];
-    if (!arenabuf_) ERR ("Not enough memory for page cache data");
     // align by MEMPAGESIZE boundary
-    uint32 off = ((uint32) arenabuf_) % MEM_PAGE_SIZE;
+    uint64 off = ((uint64) arenabuf_) % MEM_PAGE_SIZE;
     if (off)
         arena_ = arenabuf_ + MEM_PAGE_SIZE - off;
     else
@@ -896,7 +896,8 @@ void Pager_imp::makerange_ (uint32 slotidx, uint32 count)
 #endif
 
     // for every slot
-    for (uint32 si = slotidx; si < slotidx + count;)
+    uint32 si;
+    for (si = slotidx; si < slotidx + count;)
     {
         Page& slot = pages_ [si];
         // if page used

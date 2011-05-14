@@ -5,10 +5,11 @@
 
 #include <stdio.h>
 #include <string>
-//#include <iostream>
+#include <iostream>
 #include <stdlib.h>
 #include <time.h>
-//#include "i64out.h"
+#include "i64out.h"
+#include <string.h>
 
 namespace edb
 {
@@ -26,11 +27,11 @@ static bool naiveTest ()
     PagedFile& pf = pagedFileFactory.wrap (splitFileFactory.create (TSTDIR, TSTNAME));
     pf.setPageSize (16);
 
-    char* tpl = "Kokostrawberry";
+    const char* tpl = "Kokostrawberry";
     int tplen = strlen (tpl);
     uint32 psize = pf.getPageSize ();
 
-    
+
     char* s = new char [psize*2];
     char* t = s;
     while (t-s < psize*2-1)
@@ -46,9 +47,10 @@ static bool naiveTest ()
 
     char* rs = (char*) pf.fetch (1001);
 
-    printf ( "Written to two pages: %s\n", s);
-    printf ( "Read from one page: %s\n", rs);
-
+    // printf ( "Written to two pages: %s\n", s);
+    std::cerr << "Written to two pages: " <<  s << std::endl;
+    // printf ( "Read from one page: %s\n", rs);
+    std::cerr << "Read from one page: " << rs << std::endl;
 
     pf.close ();
 
@@ -64,12 +66,14 @@ static bool volumeTest ()
 
     if (splitFileFactory.exists (TSTDIR, TSTNAME))
     {
-        printf ( "Opening existing file: %s\\%s\n", TSTDIR, TSTNAME);
+        // printf ( "Opening existing file: %s\\%s\n", TSTDIR, TSTNAME);
+        std::cerr << "Opening existing file: " << TSTDIR << "\\" << TSTNAME << std::endl;
         file = &splitFileFactory.open (TSTDIR, TSTNAME);
     }
     else
     {
-        printf ( "Creating new file: %s\\%s\n", TSTDIR, TSTNAME);
+        // printf ( "Creating new file: %s\\%s\n", TSTDIR, TSTNAME);
+        std::cerr << "Creating new file: " << TSTDIR << "\\" << TSTNAME << std::endl;
         file = &splitFileFactory.create (TSTDIR, TSTNAME);
     }
 
@@ -84,7 +88,8 @@ static bool volumeTest ()
     thePagerMgr ().releasePager (npagesz);
 #endif
 
-    printf ( "File length = %I64d bytes, page size = %d bytes\n", pf.length (), pf.getPageSize ());
+    // printf ( "File length = %I64d bytes, page size = %d bytes\n", pf.length (), pf.getPageSize ());
+    std::cerr << "File length = " << pf.length ();
 
     // test reading / writing 16-kb pages
 
@@ -96,13 +101,16 @@ static bool volumeTest ()
     // expand file
     FilePos iter;
     clock_t start = clock ();
-    printf ( "Expanding file to %I64d bytes\n", pageno*ps);
+    // printf ( "Expanding file to %I64d bytes\n", pageno*ps);
+    std::cerr << "Expanding file to " << pageno*ps <<  " bytes" << std::endl;
     for (iter = 0; iter < pageno; iter ++)
     {
         char* buf = (char*) pf.fake (iter);
         memset (buf, 0xF, ps);
         pf.mark (buf);
-        if (iter % 100 == 0) printf ( "\r%I64d (%I64d), %I64d  Kb/sec", iter, pageno, (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1));
+        if (iter % 100 == 0) 
+            // printf ( "\r%I64d (%I64d), %I64d  Kb/sec", iter, pageno, (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1));
+            std::cerr << "\r" << iter << " (" << pageno << ") " << (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1) << " Kb/sec";
     }
     pf.flush ();
 
@@ -111,7 +119,8 @@ static bool volumeTest ()
     uint32 touchedcnt = 0;
     uint32 covercnt   = 0;
     uint32 maxp = 0;
-    printf ("\nWriting %I64d pages\n", iterno);
+    // printf ("\nWriting %I64d pages\n", iterno);
+    std::cerr << "\nWriting " << iterno << " pages" << std::endl;
     for (iter = 0; iter < iterno; iter ++)
     {
         FilePos pg = (((FilePos) rand ()) * rand ()) % pageno;
@@ -119,7 +128,8 @@ static bool volumeTest ()
         if (pg + count >= pageno)
             count = pageno - pg;
         char* buf = (char*) pf.fetch (pg, count);
-        for (int pp = 0; pp < count; pp ++)
+        int pp;
+        for (pp = 0; pp < count; pp ++)
             if (*(buf+pp*ps) != 0xF)
                 break;
         if (pp == count)
@@ -136,14 +146,16 @@ static bool volumeTest ()
                 maxp = pg;
         }
         if (iter % 100 == 0) 
-            printf ( "\r%I64d, %I64d Kb/sec, %d ranges, %d pages, %d upb", iter, (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1), touchedcnt, covercnt, maxp);
+            // printf ( "\r%I64d, %I64d Kb/sec, %d ranges, %d pages, %d upb", iter, (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1), touchedcnt, covercnt, maxp);
+            std::cerr << "\r" << iter << ", " << (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1) << " Kb/sec, " << touchedcnt << " ranges, " << covercnt << "pages ," << maxp << " upb";
     }
     // read pages in random manner
     int misses = 0;
     int regets = 0;
     int hits = 0;
     start = clock ();
-    printf ("\nReading %I64d pages", iterno);
+    // printf ("\nReading %I64d pages", iterno);
+    std::cerr << "\nReading " << iterno << " pages" << std::endl;
     for (iter = 0; iter < iterno; iter ++)
     {
         FilePos pg = (((FilePos) rand ()) * rand ()) % pageno;
@@ -163,10 +175,12 @@ static bool volumeTest ()
                 buf = (char*) pf.fetch (pg, count);
             }
             if (*(FilePos*) (buf + count*ps - 8) != pg)
-                printf ( "ERROR: position miss!");
+                // printf ( "ERROR: position miss!");
+                std::cerr << "ERROR: position miss!" <<std::endl;
         }
         if (iter % 100 == 0) 
-            printf ( "\r%I64d, %I64d Kb/sec, %d misses, %d hits, %d regets", iter, (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1), misses, hits, regets);
+            // printf ( "\r%I64d, %I64d Kb/sec, %d misses, %d hits, %d regets", iter, (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1), misses, hits, regets);
+            std::cerr << "\r" << iter << ", " << (iter*ps*CLOCKS_PER_SEC/1024)/(clock () - start + 1) << " Kb/sec, " << misses << " misses, " << hits << " hits, " << regets << " regets";
     }
 
     pf.close ();
@@ -182,84 +196,109 @@ bool sizeTest ()
 
     if (splitFileFactory.exists (TSTDIR, TSTNAME))
     {
-        printf ( "Opening existing file: %s\\%s\n", TSTDIR, TSTNAME);
+        // printf ( "Opening existing file: %s\\%s\n", TSTDIR, TSTNAME);
+        std::cerr << "Opening existing file: " << TSTDIR << "\\" << TSTNAME << std::endl;
         file = &splitFileFactory.open (TSTDIR, TSTNAME);
     }
     else
     {
-        printf ( "Creating new file: %s\\%s\n", TSTDIR, TSTNAME);
+        // printf ( "Creating new file: %s\\%s\n", TSTDIR, TSTNAME);
+        std::cerr << "Creating new file: " << TSTDIR << "\\" << TSTNAME << std::endl;
         file = &splitFileFactory.create (TSTDIR, TSTNAME);
     }
 
     PagedFile& pf = pagedFileFactory.wrap (*file);
 
-    printf ( "File length = %I64d bytes, page size = %d bytes\n", pf.length (), pf.getPageSize ());
+    // printf ( "File length = %I64d bytes, page size = %d bytes\n", pf.length (), pf.getPageSize ());
+    std::cerr << "File length = " << pf.length () << " bytes, page size = " << pf.getPageSize () << " bytes" << std::endl;
 
-    printf ( "Changing size to 0\n");
+    // printf ( "Changing size to 0\n");
+    std::cerr << "Changing size to 0" << std::endl;
 
     pf.chsize (0);
 
-    printf ( "File length = %I64d bytes\n", pf.length ());
+    // printf ( "File length = %I64d bytes\n", pf.length ());
+    std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
-    printf ( "Faking page 10\n");
+    // printf ( "Faking page 10\n");
+    std::cerr << "Faking page 10" << std::cerr;
 
     void* buf = pf.fake  (10);
 
-    printf ( "File length = %I64d bytes\n", pf.length ());
+    // printf ( "File length = %I64d bytes\n", pf.length ());
+    std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
-    printf ( "Fetching page 20\n");
+    // printf ( "Fetching page 20\n");
+    std::cerr << "Fetching page 20" << std::cerr;
 
     buf = pf.fetch  (20);
 
-    printf ( "File length = %I64d bytes\n", pf.length ());
+    // printf ( "File length = %I64d bytes\n", pf.length ());
+    std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
-    printf ( "Marking page 20\n");
+    // printf ( "Marking page 20\n");
+    std::cerr << "Marking  page 20" << std::cerr;
 
     *(char*)buf = '*';
     pf.mark (buf);
 
-    printf ( "File length = %I64d bytes\n", pf.length ());
+    // printf ( "File length = %I64d bytes\n", pf.length ());
+    std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
-    printf ( "Committing page 20\n");
+    // printf ( "Committing page 20\n");
+    std::cerr << "Committing page 20" << std::cerr;
 
     pf.flush ();
 
-    printf ( "File length = %I64d bytes\n", pf.length ());
+    // printf ( "File length = %I64d bytes\n", pf.length ());
+    std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
-    printf ( "Fetching page 100\n");
+    // printf ( "Fetching page 100\n");
+    std::cerr << "Fetching page 100" << std::cerr;
 
     pf.fetch (100);
 
-    printf ( "File length = %I64d bytes\n", pf.length ());
+    //printf ( "File length = %I64d bytes\n", pf.length ());
+    std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
-    printf ( "Closing file\n");
+    // printf ( "Closing file\n");
+    std::cerr << "Closing file" << std::cerr;
 
     pf.close ();
-    if (pf.isOpen ()) printf ( "ERROR: File open after close!");
-
-    printf ( "re-opening\n");
+    if (pf.isOpen ()) 
+        // printf ( "ERROR: File open after close!");
+        std::cerr << "ERROR: File open after close!" << std::cerr;
+    
+    // printf ( "re-opening\n");
+    std::cerr << "re-opening" << std::cerr;
 
     file = &splitFileFactory.open (TSTDIR, TSTNAME);
     PagedFile& pf1 = pagedFileFactory.wrap (*file);
 
-    printf ( "File length = %I64d bytes, page size = %d bytes\n", pf1.length (), pf1.getPageSize ());
+    // printf ( "File length = %I64d bytes, page size = %d bytes\n", pf1.length (), pf1.getPageSize ());
+    std::cerr << "File length = " << pf1.length () << " bytes, page size = " << pf1.getPageSize () << std::endl;
 
-    printf ( "Changing size to 55\n");
+    // printf ( "Changing size to 55\n");
+    std::cerr << "Changing size to 55" << std::cerr;
 
     pf1.chsize (55);
 
-    printf ( "File length = %I64d bytes\n", pf1.length ());
+    std::cerr << "File length = " << pf1.length () << " bytes" << std::endl;
 
-    printf ( "Closing file\n");
+    // printf ( "Closing file\n");
+    std::cerr << "Closing file" << std::cerr;
 
     pf1.close ();
 
-    printf ( "re-opening\n");
+    // printf ( "re-opening\n");
+    std::cerr << "re-opening" << std::cerr;
 
     file = &splitFileFactory.open (TSTDIR, TSTNAME);
     PagedFile& pf2 = pagedFileFactory.wrap (*file);
 
-    printf ( "File length = %I64d bytes\n", pf2.length ());
+    // printf ( "File length = %I64d bytes\n", pf2.length ());
+    std::cerr << "File length = " << pf1.length () << " bytes" << std::endl;
+
     pf2.close ();
 
     return true;

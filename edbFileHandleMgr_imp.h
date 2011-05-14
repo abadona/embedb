@@ -10,6 +10,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <string.h>
 #include "edbFileHandleMgr.h"
 
 namespace edb
@@ -29,7 +30,7 @@ struct FileInfo
     bool        free_;
 };
 struct StringCompare
-{   bool operator () (const const char* s1, const char* s2) const
+{   bool operator () (const char* s1, const char* s2) const
     {  return (strcmp (s1, s2) < 0); } };
 
 typedef std::map    <const char*, Fid, StringCompare> NameFidMap;
