@@ -41,13 +41,15 @@
 #include <math.h>
 #include <malloc.h>
 #include <assert.h>
-
 #include <stdlib.h>
+#include <stdio.h>
+
 // Code configuration parameters
 inline const char *cpoint(int n, const char *auxmsg=0)
 {
     char buf[10];
-    itoa(n, buf, 10);
+    // itoa(n, buf, 10);
+    sprintf (buf, "%d", n);
     int len = strlen(buf);
     if (auxmsg) len += strlen(auxmsg) + 1;
     char *res = new char[len+1];
@@ -501,7 +503,7 @@ protected:
         file_.mark(fp);
         file_.mark(mp);
 #if defined (_DEBUG) && defined (TEST_VERBOSE)
-        printf("free page %I64d\n", pg);
+        std::cerr <<"free page" << pg << std::endl;
 #endif
     }
 #if 0
@@ -1135,7 +1137,7 @@ protected:
         // Split root keyset in halves
         uint16 nkeys = root.nkeys();
 #if defined (_DEBUG) && defined (TEST_VERBOSE)
-        printf ("\nSplitting root at level %d, nkeys %d\n", (int) level, (int) nkeys);
+        std::cerr << std::endl << "Splitting root at level " << (int) level << ", nkeys " << (int) nkeys << std::endl;
 #endif
         char *rootkeys = root.data();
         uint16 median, rbegin, lnkeys, rnkeys;

@@ -351,7 +351,7 @@ void VStorage_imp::split_free_ (RecLocator locator, BlockHdr& block, RecLen len)
 void VStorage_imp::split_used_ (RecLocator locator, BlockHdr& block, RecLocator nextLocator, BlockHdr& nextBlock, RecLen len)
 {
 #ifdef VSTORAGE_IMP_DEBUG
-    if (block.free_ != FREEFLAG)
+    if (block.free_ == FREEFLAG)
         ERR("split_used: splitting free block");
 #endif
     

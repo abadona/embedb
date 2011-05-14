@@ -6,10 +6,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h>
-//#include <iostream>
-//#include <iomanip>
-//#include "i64out.h"
+//#include <conio.h>
+#include <iostream>
+#include <iomanip>
+#include "i64out.h"
 #include <set>
 
 namespace edb
@@ -19,7 +19,10 @@ static const char tstd [] = ".";
 static const char tstn [] = "tstFS";
 static const FRecLen reclen = 100;
 static const FRecLen hdrlen = 400;
-static const uint64 tstsize = 1000000;
+static const uint64 tstsize = 100000;
+
+static const unsigned MAX_TEST_ITER = 5;
+
 
 
 static bool naiveTest ()
@@ -35,45 +38,54 @@ static bool naiveTest ()
 
     fs.writeHeader (hdrline, sizeof (hdrline));
 
-    printf ("File init, recno = %I64d, recsize = %d", fs.getRecCount (), fs.getRecLen ());
+    // printf ("File init, recno = %I64d, recsize = %d", fs.getRecCount (), fs.getRecLen ());
+    std::cerr << "File init, recno = " << fs.getRecCount () << ", recsize = " << fs.getRecLen () << fs.getRecLen () << std::endl;
     char buf [reclen];
 #if 0
-    printf ( "Writing %I64d records", tstsize);
+    // printf ( "Writing %I64d records", tstsize);
+    std::cerr << "Writing " <<  tstsize << " records" << std::endl;
     for (uint64 u = 0; u < tstsize; u ++)
     {
         *(uint64*) buf = u;
         fs.addRec (buf);
         if (u % 10000 == 0)
-            printf ("%I64u, totalrec = %I64d\r", u,  fs.getRecCount ());
+            // printf ("%I64u, totalrec = %I64d\r", u,  fs.getRecCount ());
+            std::cerr << u << ", totalrec = " << fs.getRecCount () << "\r";
     }
 
-    printf ( "Reading %I64d records", tstsize);
+    // printf ( "Reading %I64d records", tstsize);
+    stdd::cerr << "Reading " << tstsize << " records" << std::endl;
     for (u = 0; u < tstsize; u ++)
     {
         fs.readRec (u, buf);
         if (*(uint64*) buf != u)
             ERR("Error");
         if (u % 10000 == 0)
-            printf ("%I64u, totalrec = %I64d\r", u,  fs.getRecCount ());
+            // printf ("%I64u, totalrec = %I64d\r", u,  fs.getRecCount ());
+            std::cerr << u << ", totalrec = " << fs.getRecCount () << std::endl;
     }
 
-    printf ( "Deleting %I64d records", tstsize);
+    // printf ( "Deleting %I64d records", tstsize);
+    std::cerr << "Deleting " << tstsize << " records" << std::endl;
     for (u = 0; u < tstsize; u ++)
     {
         fs.freeRec (u);
         if (u % 10000 == 0)
-            printf ("%I64u, totalrec = %I64d\r", u,  fs.getRecCount ());
+            // printf ("%I64u, totalrec = %I64d\r", u,  fs.getRecCount ());
+            std::cerr << u << ", totalrec = " << fs.getRecCount () << "\r";
     }
 #endif
-    printf ( "Random testing");
-    while (1)
+    // printf ( "Random testing");
+    std::cerr << "Random testing" << std::endl;
+    unsigned test_iter = 0;
+    while (test_iter ++ <= MAX_TEST_ITER)
     {
-        if (kbhit ())
-            if (getch () == 27)
-                break;
+//        if (kbhit ())
+//            if (getch () == 27)
+//                break;
 
-        int addno = rand () + 1;
-        int skipno = (rand () * rand ()) + 1; 
+        int addno = rand () % tstsize + 1;
+        int skipno = (rand () * rand ()) % tstsize + 1; 
         int delno = rand () + 1;
 
         if (delno > fs.getRecCount ())
@@ -82,7 +94,8 @@ static bool naiveTest ()
         if (skipno > fs.getRecCount () - delno)
             skipno = fs.getRecCount () - delno;
 
-        printf ( "Adding %d\r", addno);
+        // printf ( "Adding %d\r", addno);
+        std::cerr << "Adding " << addno << "\r";
         for (int i = 0; i < addno; i ++)
         {
             RecNum rno = fs.allocRec ();
@@ -92,7 +105,8 @@ static bool naiveTest ()
 
         int skip = 0;
         RecNum curno = 0;
-        printf ( "Skiping %d\r", skipno);
+        // printf ( "Skiping %d\r", skipno);
+        std::cerr << "Skiping " << skipno << "\r";
         while (curno < fs.getRecCount ())
         {
             if (fs.isValid (curno))
@@ -103,12 +117,15 @@ static bool naiveTest ()
             }
             curno ++;
         }
-        printf ( "Deleting %d\r", delno);
+        // printf ( "Deleting %d\r", delno);
+        std::cerr << "Deleting " << delno << "\r";
         for (int d = 0; d < delno && curno + d < fs.getRecCount (); d ++)
             if (fs.isValid (curno + d))
                 fs.freeRec (curno + d);
 
-        printf ( "Checking %I64d\r", fs.getRecCount () + fs.getFreeCount ());
+        // printf ( "Checking %I64d\r", fs.getRecCount () + fs.getFreeCount ());
+        std::cerr << "Checking " << fs.getRecCount () + fs.getFreeCount () << "\r";
+                
         for (RecNum rno = 0; rno < fs.getRecCount () + fs.getFreeCount (); rno ++)
             if (fs.isValid (rno))
             {
@@ -116,7 +133,8 @@ static bool naiveTest ()
                 if (*(uint64*) buf != rno)
                     ERR("Error");
             }
-            printf ("\nused = %I64d, free = %I64d", fs.getRecCount (), fs.getFreeCount ());
+            // printf ("\nused = %I64d, free = %I64d", fs.getRecCount (), fs.getFreeCount ());
+            std::cerr << std::endl << "used = " << fs.getRecCount () << ", free = " << fs.getFreeCount () ;
     }
 
     fs.close ();

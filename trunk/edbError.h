@@ -3,6 +3,7 @@
 #define edbError_h
 
 #include <string>
+#include <sstream>
 #include "edbTypes.h"
 
 namespace edb
@@ -19,25 +20,11 @@ public:
     Error (const char* s);
     operator const char* () {return msg_;}
 };
-                         
-class ErrorStream 
+
+class ErrorStream : public std::ostringstream
 {
-private:
-    char msg_ [MAX_ERR_MSG_LEN];
-    int lpos_;
 public:
-    ErrorStream ();
     void throw_ ();
-    ErrorStream& operator << (const char* s);
-    ErrorStream& operator << (char* s);
-    ErrorStream& operator << (int8 s);
-    ErrorStream& operator << (uint8 s);
-    ErrorStream& operator << (int16 s);
-    ErrorStream& operator << (uint16 s);
-    ErrorStream& operator << (int32 s);
-    ErrorStream& operator << (uint32 s);
-    ErrorStream& operator << (int64 s);
-    ErrorStream& operator << (uint64 s);
 };
 
 

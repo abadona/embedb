@@ -20,7 +20,7 @@ public:
     virtual void        mark        (const void* page) = 0; // marks page(s) as dirty
     virtual void        unmark      (const void* page) = 0; // marks page(s) as clean
     virtual bool        commit      (File& file) = 0; // flushes the buffers to disk
-    virtual bool        chsize      (File& file, FilePos newSize) = 0; // changes size of a file and releases cache pages which are not longer valid
+    virtual bool        chsize      (File& file, FilePos newSize) = 0; // changes size of a file and releases cache pages which are no longer valid
     virtual bool        close       (File& file) = 0; // flushes data to file and closes it
     virtual bool        detach      (File& file) = 0; // flushes data to file and forgets the buffers; if any of them locked, throws exception
 

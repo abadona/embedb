@@ -3,11 +3,17 @@
 
 #include "edbFileHandleMgr_imp.h"
 #include "edbExceptions.h"
-#include <io.h>
-#include <Stdio.h>
+#include "portability.h"
+//#include <io.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <errno.h>
+
+#ifdef _MSC_VER
 #include <share.h>
+#endif
+
 
 namespace edb
 {
@@ -39,7 +45,7 @@ Fid FileHandleMgr_imp::add (const char* fname)
     fid = files_.size ();
     files_.resize (fid + 1);
     files_ [fid].name_ = fname;
-    return fid;    
+    return fid;
 }
 
 Fid FileHandleMgr_imp::open (const char* fname)
@@ -47,9 +53,9 @@ Fid FileHandleMgr_imp::open (const char* fname)
     // if allready open:
     if (findFid (fname) != -1) throw FileAllreadyOpen ();
     // test weather can open
-    int h = ::_sopen (fname, _O_BINARY|_O_RDWR, _SH_DENYWR);
+    int h = ::sci_sopen (fname, _O_BINARY|_O_RDWR, _SH_DENYWR);
     if (h == -1) return -1;
-    if (::_close (h) != 0) ERR("Unable to close file");
+    if (::sci_close (h) != 0) ERR("Unable to close file");
     // put into the array
     return add (fname);
 }
@@ -59,9 +65,9 @@ Fid FileHandleMgr_imp::create (const char* fname)
     // if allready open:
     if (findFid (fname) != -1) throw FileAllreadyOpen ();
     // test weather can open
-    int h = ::_sopen (fname, _O_CREAT|_O_EXCL|_O_BINARY|O_RDWR, _SH_DENYWR, _S_IWRITE|_S_IREAD);
+    int h = ::sci_screate (fname, _O_CREAT|_O_EXCL|_O_BINARY|O_RDWR, _SH_DENYWR, _S_IWRITE|_S_IREAD);
     if (h == -1) return -1;
-    if (::_close (h) != 0) ERR("Unable to close file");
+    if (::sci_close (h) != 0) ERR("Unable to close file");
     // put into the array
     return add (fname);
 }
@@ -99,7 +105,7 @@ bool FileHandleMgr_imp::close (Fid fid)
     FileInfo& fi = files_ [fid];
     if (fi.handle_ != -1)
     {
-        if (::_close (fi.handle_) == -1) ERR("Unable to close file: invalid handle");
+        if (::sci_close (fi.handle_) == -1) ERR("Unable to close file: invalid handle");
         fi.handle_ = -1;
         mru_.erase (fi.mrupos_);
     }
@@ -120,13 +126,22 @@ int FileHandleMgr_imp::handle (Fid fid)
             // drop the least recently used file, remembering the state
             FileInfo& lru_file = files_ [mru_.back ()];
             mru_.pop_back ();
-            lru_file.position_ = tell (lru_file.handle_);
-            ::_close (lru_file.handle_);
+            lru_file.position_ = sci_tell (lru_file.handle_);
+            ::sci_close (lru_file.handle_);
             lru_file.handle_ = -1;
             drops_ ++;
         }
-        ret = fi.handle_ = ::_sopen (fi.name_.c_str (), _O_BINARY|_O_RDWR, _SH_DENYWR);
-        ::_lseek (ret, fi.position_, SEEK_SET);
+        const char* fname = fi.name_.c_str ();
+        ret = fi.handle_ = ::sci_sopen (fname, _O_BINARY|_O_RDWR, _SH_DENYWR);
+        if (ret == -1)
+        {
+            ers << "Unable to open file "<< fname << ", OS error " << errno << " : " << strerror (errno);
+            ERR ("");
+        }
+        if (fi.position_ != ::sci_lseek (ret, fi.position_, SEEK_SET))
+        {
+            ERR ("Seek error");
+        }
         mru_.push_front (fid);
         fi.mrupos_ = mru_.begin ();
     }
@@ -147,7 +162,7 @@ bool FileHandleMgr_imp::commit (Fid fid)
     if (!isValid (fid)) throw FileNotOpen ();
     FileInfo& fi = files_ [fid];
     if (fi.handle_ != -1)
-       ::_commit (fi.handle_);
+       ::sci_commit (fi.handle_);
     // we do not treat the commit as an access, so we do not move file to the beginning of mru list
     return true;
 }

@@ -8,8 +8,8 @@ typedef unsigned char      uint8;
 typedef signed char        int8;
 typedef unsigned short     uint16;
 typedef signed short       int16;
-typedef unsigned long      uint32;
-typedef signed long        int32;
+typedef unsigned int       uint32;
+typedef signed int         int32;
 
 #if defined (_MSC_VER)
 typedef unsigned __int64   uint64;

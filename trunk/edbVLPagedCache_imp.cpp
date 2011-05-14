@@ -2,6 +2,7 @@
 #include "edbVLPagedCache_imp.h"
 #include "edbExceptions.h"
 #include <vector>
+#include "string.h"
 
 namespace edb
 {
@@ -63,7 +64,7 @@ void VLPagedCache_imp::free_ (Buffer& buf)
 {
     mrulist_.erase (buf.mrupos_);
     ptrmap_.erase (buf.data_);
-    delete [] buf.data_;
+    delete buf.data_;
     cursize_ -= buf.size_;
     keymap_.erase (BufKey (*buf.file_, buf.off_));
 }

@@ -10,8 +10,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-//#include <iostream>
-//#include "i64out.h"
+#include <iostream>
+#include "i64out.h"
+#include <string.h>
 
 namespace edb
 {
@@ -33,44 +34,52 @@ static bool naiveTest ()
     // srand ((unsigned) clock ());
 
     FilePos inisize = pageno*pagesize;
-    printf ( "Changing size to %I64d KBytes\n", inisize/1024);
+    // printf ( "Changing size to %I64d KBytes\n", inisize/1024);
+    std::cerr << "Changing size to " <<  inisize/1024 << " KBytes" << std::endl;
     pager.chsize (file, inisize);
     
-    printf ( "Filling the file, %I64d pages\n", pageno);
+    // printf ( "Filling the file, %I64d pages\n", pageno);
+    std::cerr << "Filling the file, " << pageno << " pages" << std::endl;
     clock_t stt = clock ();
-    uint32  previ = 0;
-    for (uint64 i = 0; i < pageno; i ++)
+    uint32 i, previ = 0;
+    for (i = 0; i < pageno; i ++)
     {
         char* buf = (char*) pager.fake (file, i);
         memset (buf, 0, pagesize);
         pager.mark (buf);
         if (i % 100 == 0) 
-            printf ( "\r%I64d, %I64d items/sec, %I64d dumps, %I64d hits, %I64d misses.", i, ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1), pager.getDumpCount (), pager.getHitsCount (), pager.getMissesCount ());
-            previ = i,
+        {
+            // printf ( "\r%I64d, %I64d items/sec, %I64d dumps, %I64d hits, %I64d misses.", i, ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1), pager.getDumpCount (), pager.getHitsCount (), pager.getMissesCount ());
+            std::cerr << "\r" << i << ", " << ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1) << " items/sec, " << pager.getDumpCount () << " dumps, " << pager.getHitsCount () << " hits, " << pager.getMissesCount () << " misses.";
+            previ = i;
             stt = clock ();
+        }
     }
 
 
-    printf ("\nWriting data, %I64d elements", iterno);
+    // printf ("\nWriting data, %I64d elements", iterno);
+    std::cerr << "\nWriting data, " << iterno << " elements" << std::endl;
     stt = clock ();
     previ = 0;
     for (i = 0; i < iterno; i ++)
     {
         uint64 p = (rand ()*rand ()) % pageno;
         int count = 1 + rand () % 3;
-        if (i == 671)
-            __asm nop;
         char* buf = (char*) pager.fake (file, p, false, count);
         memset (buf, 0, pagesize*count);
         *(uint64*) (buf + (pagesize-sizeof (uint64))) = p;
         *buf = '*';
         pager.mark (buf);
         if (i % 100 == 0) 
-            printf ( "\r%I64d, %I64d items/sec, %I64d dumps, %I64d hits, %I64d misses.", i, ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1), pager.getDumpCount (), pager.getHitsCount (), pager.getMissesCount ());
-            previ = i,
+        {
+            // printf ( "\r%I64d, %I64d items/sec, %I64d dumps, %I64d hits, %I64d misses.", i, ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1), pager.getDumpCount (), pager.getHitsCount (), pager.getMissesCount ());
+            std::cerr << "\r" << i << ", " << ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1) << " items/sec, " << pager.getDumpCount () << " dumps, " << pager.getHitsCount () << " hits, " << pager.getMissesCount () << " misses.";
+            previ = i;
             stt = clock ();
+        }
     }
-    printf ("\nReading data, %I64d elements\n", iterno);
+    // printf ("\nReading data, %I64d elements\n", iterno);
+    std::cerr << "\nReading data, " << iterno << " elements" << std::endl;
     stt = clock ();
     previ = 0;
     int repeats = 0;
@@ -83,12 +92,16 @@ static bool naiveTest ()
         {
             repeats ++;
             if (*(uint64*) (d + (pagesize-sizeof (uint64))) != p)
-                printf ( "ERROR ! POSITION MISS!");
+                // printf ( "ERROR ! POSITION MISS!");
+                std::cerr << "ERROR ! POSITION MISS!" << std::endl;
         }
         if (i % 100 == 0) 
-            printf ( "\r%I64d (%d repeats), %I64d items/sec, %I64d dumps, %I64d hits, %I64d misses.", i, repeats, ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1), pager.getDumpCount (), pager.getHitsCount (), pager.getMissesCount ());
-            previ = i,
+        {
+            // printf ( "\r%I64d (%d repeats), %I64d items/sec, %I64d dumps, %I64d hits, %I64d misses.", i, repeats, ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1), pager.getDumpCount (), pager.getHitsCount (), pager.getMissesCount ());
+            std::cerr << "\r" << i << " (" << repeats << " repeats), " << ((i - previ) * CLOCKS_PER_SEC) / (clock () - stt + 1) << " items/sec, " << pager.getDumpCount () << " dumps, " << pager.getHitsCount () << " hits, " << pager.getMissesCount () << " misses.";
+            previ = i;
             stt = clock ();
+        }
     }
     pager.close (file);
     return true;
@@ -124,7 +137,8 @@ bool boundsTest ()
     File& file = splitFileFactory.create (tdir, tfile);
     Pager& pager = pagerFactory.create (pagesize, poolsize);
 
-    for (uint64 pgno = 0; pgno < 1000; pgno ++)
+    uint64 pgno;
+    for (pgno = 0; pgno < 1000; pgno ++)
     {
         uint64* ptr = (uint64*) pager.fake (file, pgno);
         *ptr = pgno;
@@ -135,7 +149,8 @@ bool boundsTest ()
     {
         uint64* ptr = (uint64*) pager.fetch (file, pgno);
         if (*ptr != pgno)
-            printf ( "Print: OBSDACHA");
+            // printf ( "Print: OBSDACHA");
+            std::cerr << "ERROR counting pages!" << std::endl;
     }
 
 

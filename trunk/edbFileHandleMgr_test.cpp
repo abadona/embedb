@@ -6,12 +6,18 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <io.h>
-//#include <iostream>
+//#include <io.h>
+#include <iostream>
 #include <string>
 #include <time.h>
 #include <vector>
-//#include "i64out.h"
+#include <string.h>
+#include "i64out.h"
+
+#ifdef __MSC_VER
+#include <io.h>
+#endif
+#include "portability.h"
 
 #define FILENO 100
 #define POOLSIZE 98
@@ -25,38 +31,39 @@ static void naiveTest ()
 
     fileHandleMgr.setPoolSize (POOLSIZE);
 
-    printf ("Creating files\n");
-    
+    std::cerr << "Creating files" << std::endl;
+
     char buf [100];
     Fid  fids [FILENO];
 
-    for (int i = 0; i < FILENO; i ++)
+    int i;
+    for (i = 0; i < FILENO; i ++)
     {
         sprintf (buf, "TF%d", i);
         fids [i] = fileHandleMgr.create (buf);
         if (fids [i] == -1)
-            printf ( "Unable to create file : %s\n", buf);
+            std::cerr << "Unable to create file : " <<  buf << std::endl;
     }
 
-    printf ( "Writing\n");
+    std::cerr <<  "Writing" << std::endl;
     for (i = 0; i < ITERNO; i ++)
     {
         int fileno = rand () % FILENO;
         int h = fileHandleMgr.handle (fids [fileno]);
         if (h == -1)
-            printf ( "Could not get handle for : %s\n", buf);
+            std::cerr << "Could not get handle for : " << buf << std::endl;
         sprintf (buf, "TF%d - %d\n", fileno, i);
-        write (h, buf, strlen (buf));
+        ::sci_write (h, buf, strlen (buf));
 
         if (i % 1000 == 0)
-            printf ("\r%d - %I64d", i, fileHandleMgr.getDropCount ());
+            std::cerr << "\r" << i << " - " << fileHandleMgr.getDropCount ();
     }
 
-    printf ("\nClosing\n");
+    std::cerr << "\nClosing" << std::endl;
     for (i = 0; i < FILENO; i ++)
     {
         if (!fileHandleMgr.close (fids [i]))
-            printf ( "Unable to close file : %d\n", fids [i]);
+            std::cerr << "Unable to close file : " << fids [i] << std::endl;
     }
 }
 
@@ -76,7 +83,7 @@ static void speedTest ()
         fids [i] = fileHandleMgr.create (buf);
         if (fids [i] == -1)
         {
-            printf ( "Unable to create file : %s\n", buf);
+            std::cerr << "Unable to create file : " << buf << std::endl;
             return;
         }
 
@@ -90,10 +97,11 @@ static void speedTest ()
         fileHandleMgr.handle (fids [fno]);
 
         if (i % 100000 == 0)
-            printf ( "\r%d, %I64d\n", i, fileHandleMgr.getDropCount ());
+            // printf ( "\r%d, %I64d\n", i, fileHandleMgr.getDropCount ());
+            std::cerr << "\r" << i << ", " << fileHandleMgr.getDropCount ();
     }
     int speed = ITERNO / (time (NULL) - t + 1);
-    printf ("\nSpeed is %d handles per second\n", speed);
+    std::cerr << "\nSpeed is " <<  speed << " handles per second" << std::endl;
 
 
 }
@@ -103,7 +111,7 @@ bool testFileHandleMgr ()
     // naiveTest ();
     speedTest ();
     
-    printf ("Done\n");
+    std::cerr << "Done" << std::endl;
 
     return true;
 }

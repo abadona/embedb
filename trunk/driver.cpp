@@ -7,9 +7,9 @@
 //#define VSTORAGE_UNIT_TEST
 //#define FSTORAGE_UNIT_TEST
 
-#include <stdio.h>
 #include "edbError.h"
 #include "edbTests.h"
+#include <iostream>
 
 #ifdef BTREE_UNIT_TEST
 #include "edbBTree.h"
@@ -17,44 +17,57 @@
 
 main ()
 {
+    std::cerr << "edb unittest collection" << std::endl;
     try
     {
 #ifdef FILE_HANDLE_MGR_UNIT_TEST
-    fprintf (stderr, "Testing FileHandleMgr...\n");
+    std::cerr << "Testing FileHandleMgr..." << std::endl;
     edb::testFileHandleMgr ();
+    std::cerr << "Done with testing FileHandleMgr." << std::endl;
 #endif
 #ifdef FILE_UNIT_TEST
-    fprintf (stderr, "Testing File...\n");
+    std::cerr << "Testing File..." << std::endl;
     edb::testFile ();
+    std::cerr << "Done with testing File." << std::endl;
 #endif
 #ifdef VLPAGED_FILE_UNIT_TEST
-    fprintf (stderr, "Testing VLPagedFile...\n");
+    std::cerr << "Testing VLPagedFile..." << std::endl;
     edb::testVLPagedFile ();
+    std::cerr << "Done with testing VLPagedFile." << std::endl;
 #endif
 #ifdef PAGER_UNIT_TEST
-    fprintf (stderr, "Testing Pager...\n");
+    std::cerr << "Testing Pager..." << std::endl;
     edb::testPager ();
+    std::cerr << "Done with testing Pager." << std::endl;
 #endif
 #ifdef PAGED_FILE_UNIT_TEST
-    fprintf (stderr, "Testing PagedFile...\n");
+    std::cerr << "Testing PagedFile..." << std::endl;
     edb::testPagedFile ();
+    std::cerr << "Done with testing PagedFile." << std::endl;
 #endif
 #ifdef BTREE_UNIT_TEST
-    fprintf (stderr, "Testing B-tree...\n");
+    std::cerr << "Testing B-tree..." << std::endl;
     edb::testBTree();
+    std::cerr << "Done with testing B-tree." << std::endl;
 #endif
 #ifdef VSTORAGE_UNIT_TEST
-    fprintf (stderr, "Testing Variable-length storage...\n");
+    std::cerr << "Testing Variable-length storage..." << std::endl;
     edb::testVStorage();
+    std::cerr << "Done with testing Variable-length storage." << std::endl;
 #endif
 #ifdef FSTORAGE_UNIT_TEST
-    fprintf (stderr, "Testing Fixed-length storage...\n");
+    std::cerr << "Testing Fixed-length storage..." << std::endl;
     edb::testFStorage();
+    std::cerr << "Done with testing Fixed-length storage..." << std::endl;
 #endif
     }
     catch (edb::Error& e)
     {
-        fprintf (stderr, "Error: %s", (const char*) e);
+        std::cerr << "Error: " << (const char*) e << std::endl ;
     }
-    return 0;    
+    catch (...)
+    {
+        std::cerr << "Unhandled exception caught" << std::endl;
+    }
+    return 0;
 }

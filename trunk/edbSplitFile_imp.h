@@ -45,7 +45,7 @@ public:
 friend class SplitFileFactory_imp;
 };
 
-const char* name4number    (const char* base_name, int32 number);
+void name4number    (const char* base_name, int32 number, char* dest, unsigned destlen);
 
 class SplitFileFactory_imp : public FileFactory
 {
