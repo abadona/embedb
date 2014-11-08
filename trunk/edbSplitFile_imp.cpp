@@ -302,7 +302,7 @@ bool SplitFile_imp::chsize (FilePos newLength)
             fileHandleMgr.close (fid);
             char name [MAXBUF];
             name4number (base_name_.c_str (), fileno, name, MAXBUF);
-            ::unlink (name);
+            ::sci_unlink (name);
             fids_.pop_back ();
         }
         int h = fileHandleMgr.handle (fids_[new_last_file]);
