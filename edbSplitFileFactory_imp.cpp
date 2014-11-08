@@ -2,7 +2,7 @@
 #define splitFileFactory_defined
 #include "edbSplitFile_imp.h"
 #include "edbExceptions.h"
-//#include <io.h>
+#include "portability.h"
 #include <errno.h>
 #include <iterator>
 
@@ -66,7 +66,7 @@ bool SplitFileFactory_imp::erase (const char* directory, const char* basename)
     while (1)
     {
         name4number (f.base_name_.c_str (), fno, name, MAXBUF);
-        if (::unlink (name) != 0)
+        if (::sci_unlink (name) != 0)
         {
             if (errno == ENOENT)
             {
