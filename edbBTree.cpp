@@ -1,38 +1,16 @@
-// Copyright 2001 Victor Joukov, Denis Kaznadzey
+//////////////////////////////////////////////////////////////////////////////
+//// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
+//// 
+//// This program is free software; you can redistribute, reuse,
+//// or modify it with no restriction, under the terms of the MIT License.
+//// 
+//// This program is distributed in the hope that it will be useful,
+//// but WITHOUT ANY WARRANTY; without even the implied warranty of
+//// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//// 
+//// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
+//////////////////////////////////////////////////////////////////////////////
 
-// This is implementation of the B-tree based index.
-// It implements three variations of index - unique key,
-// duplicate key and so called range index, which maps
-// ranges of consequitive numbers, e.g 1, 2, 3, 4, 5, -> 3, 4, 5, 6, 7
-// It does this effectively, falling down to common B-Tree
-// performance (with some space overhead - 4 bytes per key)
-// if the input data differ in structure from range map.
-// This index RELIES on MSB First layout of keys and values
-
-// TODO:
-//   0. merge stepCursor and removePair into stepCursor(cur, remove)
-//   DONE
-//   0.1 make removeEntry release free page and notify higher level that no more
-//       page ref needed
-//   Almost DONE by overloading decrementCounter procedure
-//   with page housekeeping.
-//   1. Rename keyAt into getKey and readKey and so with valueAt,
-//     depending on whether it is copying version or not. Fix len of keyAt
-//     somehow.
-//   valueAt gone for good, replaced by readValue and compareValue
-//   2. Do not compare pos and nkeys, because nkeys is actually nentries.
-//     Either calculate (comp. intensive) or store true nkey for node, and
-//     do not mix usage of nkeys and nentries.
-//   3. Interface for count and implementation - count is attribute of payload
-//     for internal nodes. It should be updated on each insert/remove for each
-//     search path, and should be rolled back if this operation failed.
-//   DONE
-//   4. Test for cursor (fetch, remove)
-//   5. Test for duplicate keys
-//   6. Test for faulty conditions - insertion of existing key or key/value
-//     search for non-existent key or key/value
-//   7. Test for partial match
-//   8. Test for freshly init'ed file (without detach/attach)
 #include "edbTypes.h"
 #include "edbExceptions.h"
 #include "edbBTree.h"

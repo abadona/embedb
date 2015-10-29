@@ -1,22 +1,15 @@
-// This is low level interface to B-tree index.
-//
-// This interface relies on no-copy, no-allocation
-// strategy. It means it never copies anything into
-// its own objects, never copies anything to user-provided
-// variables, except pointers to memory and never passes
-// newly allocated memory outside.
-// All this is done to provide performance, but it comes
-// with some downsides. The user of the interface can not
-// rely on stable memory after next call to the functions
-// of this interface (and, generally, the whole edb package).
-// If you need something to survive call to edb, copy this
-// yourself.
-// The module relies on caching level to manage its memory needs.
-// So in multi-threaded setup to provide user with guarantee
-// that memory does not change between calls, this should be
-// somehow reflected in underlying caching interface.
-//
-// Copyright 2001 Victor Joukov, Denis Kaznadzey
+//////////////////////////////////////////////////////////////////////////////
+//// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
+//// 
+//// This program is free software; you can redistribute, reuse,
+//// or modify it with no restriction, under the terms of the MIT License.
+//// 
+//// This program is distributed in the hope that it will be useful,
+//// but WITHOUT ANY WARRANTY; without even the implied warranty of
+//// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//// 
+//// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
+//////////////////////////////////////////////////////////////////////////////
 
 #ifndef edbBTree_h
 #define edbBTree_h
