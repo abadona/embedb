@@ -1,0 +1,27 @@
+QSimScan (Quick Similarity Scanner)
+
+Utilities for fast biosequence similarity search.
+
+Authors:
+  Denis Kaznadzey
+  Victor Joukov
+  
+Copyright (c) 1998-2015, SciDM (Scientific Data Management)
+
+License: 
+  MIT license (see LICENSE.txt).
+
+Requirements:
+  GCC/G++ version 4+
+
+Compatibility:
+  Linux
+  Windows
+  Windows-Cygwin
+
+Presently 2 utilities are released:
+  nsimscan for comparing nucleic acid sequences
+  psimscan for comparing protein sequences
+
+To build, run 'make' in root directory
+
