@@ -1,6 +1,15 @@
-QSimScan (Quick Similarity Scanner)
+EmbeDB (Embedded DataBase)
 
-Utilities for fast biosequence similarity search.
+High-performance data storage and access library, written in C++.
+Features:
+
+- Tightly optimized performance
+- Native C++ implementation
+- File system virtualization layer for cached paging
+- Time- and space-efficient variable-length records management
+- Flexible Btrees 
+- Range encoded key/values storage, allowing for amortized constant time access.
+
 
 Authors:
   Denis Kaznadzey
@@ -18,10 +27,6 @@ Compatibility:
   Linux
   Windows
   Windows-Cygwin
-
-Presently 2 utilities are released:
-  nsimscan for comparing nucleic acid sequences
-  psimscan for comparing protein sequences
 
 To build, run 'make' in root directory
 
