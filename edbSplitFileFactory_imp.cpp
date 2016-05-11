@@ -12,9 +12,9 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define splitFileFactory_defined
+#include "portability.h"
 #include "edbSplitFile_imp.h"
 #include "edbExceptions.h"
-#include "portability.h"
 #include <errno.h>
 #include <iterator>
 

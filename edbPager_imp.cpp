@@ -25,15 +25,15 @@ namespace edb
 // the maximal step between pages to use as 'continous range'
 #define GAP_FACTOR 1 
 // number of continous pages in a dump sequence which is long enough to stop serching for better
-#define LONG_ENOUGH_SEQ 8  
+#define LONG_ENOUGH_SEQ 12  
 // maximal allowed size of allocation unit (in pages)
-#define MAX_PAGEROW_LEN 2
+#define MAX_PAGEROW_LEN 64
 // number of times the clean slot is better then best(longest dumpable) dirty one
 #define CLEAN_SLOT_FACTOR 2
 // number of times the empty slot is better then best(longest dumpable) dirty one
-#define EMPTY_SLOT_FACTOR 4
+#define EMPTY_SLOT_FACTOR 8
 // number of iterations through lru pages passed without score improvement which cancels further search
-#define UNIMPROVED_COUNT 16
+#define UNIMPROVED_COUNT 32
 // the restriction on the dump done at once
 #define MAX_DUMP_LEN (MAX_PAGEROW_LEN*2+LONG_ENOUGH_SEQ)
 

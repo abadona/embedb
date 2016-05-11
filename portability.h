@@ -30,6 +30,7 @@
     #define sci_commit _commit
     #define sci_filelength _filelength
     #define sci_chsize chsize
+    #define sci_unlink unlink
 #elif defined (__CYGWIN__)
     #include <unistd.h>
     #define sci_stat stat
@@ -45,6 +46,7 @@
     #define sci_commit fsync
     #define sci_filelength filelength
     #define sci_chsize ftruncate
+    #define sci_unlink unlink
 #elif defined (__MACOSX__)
     #include <unistd.h>
     #define sci_stat stat
@@ -60,6 +62,7 @@
     #define sci_commit fsync
     #define sci_filelength filelength
     #define sci_chsize ftruncate
+    #define sci_unlink unlink
 #else // plain unix :)
     #include <unistd.h>
     #define sci_stat stat64
