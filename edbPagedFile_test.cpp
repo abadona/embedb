@@ -233,7 +233,7 @@ bool sizeTest ()
     std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
     // printf ( "Faking page 10\n");
-    std::cerr << "Faking page 10" << std::cerr;
+    std::cerr << "Faking page 10" << std::endl;
 
     void* buf = pf.fake  (10);
 
@@ -241,7 +241,7 @@ bool sizeTest ()
     std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
     // printf ( "Fetching page 20\n");
-    std::cerr << "Fetching page 20" << std::cerr;
+    std::cerr << "Fetching page 20" << std::endl;
 
     buf = pf.fetch  (20);
 
@@ -249,7 +249,7 @@ bool sizeTest ()
     std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
     // printf ( "Marking page 20\n");
-    std::cerr << "Marking  page 20" << std::cerr;
+    std::cerr << "Marking  page 20" << std::endl;
 
     *(char*)buf = '*';
     pf.mark (buf);
@@ -258,7 +258,7 @@ bool sizeTest ()
     std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
     // printf ( "Committing page 20\n");
-    std::cerr << "Committing page 20" << std::cerr;
+    std::cerr << "Committing page 20" << std::endl;
 
     pf.flush ();
 
@@ -266,7 +266,7 @@ bool sizeTest ()
     std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
     // printf ( "Fetching page 100\n");
-    std::cerr << "Fetching page 100" << std::cerr;
+    std::cerr << "Fetching page 100" << std::endl;
 
     pf.fetch (100);
 
@@ -274,15 +274,15 @@ bool sizeTest ()
     std::cerr << "File length = " << pf.length () << " bytes" << std::endl;
 
     // printf ( "Closing file\n");
-    std::cerr << "Closing file" << std::cerr;
+    std::cerr << "Closing file" << std::endl;
 
     pf.close ();
     if (pf.isOpen ()) 
         // printf ( "ERROR: File open after close!");
-        std::cerr << "ERROR: File open after close!" << std::cerr;
+        std::cerr << "ERROR: File open after close!" << std::endl;
     
     // printf ( "re-opening\n");
-    std::cerr << "re-opening" << std::cerr;
+    std::cerr << "re-opening" << std::endl;
 
     file = &splitFileFactory.open (TSTDIR, TSTNAME);
     PagedFile& pf1 = pagedFileFactory.wrap (*file);
@@ -291,19 +291,19 @@ bool sizeTest ()
     std::cerr << "File length = " << pf1.length () << " bytes, page size = " << pf1.getPageSize () << std::endl;
 
     // printf ( "Changing size to 55\n");
-    std::cerr << "Changing size to 55" << std::cerr;
+    std::cerr << "Changing size to 55" << std::endl;
 
     pf1.chsize (55);
 
     std::cerr << "File length = " << pf1.length () << " bytes" << std::endl;
 
     // printf ( "Closing file\n");
-    std::cerr << "Closing file" << std::cerr;
+    std::cerr << "Closing file" << std::endl;
 
     pf1.close ();
 
     // printf ( "re-opening\n");
-    std::cerr << "re-opening" << std::cerr;
+    std::cerr << "re-opening" << std::endl;
 
     file = &splitFileFactory.open (TSTDIR, TSTNAME);
     PagedFile& pf2 = pagedFileFactory.wrap (*file);

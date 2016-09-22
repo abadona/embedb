@@ -33,18 +33,42 @@ typedef signed long long   int64;
 #error Unknown platform
 #endif
 
+#ifndef UINT64_MAX
 #define UINT64_MAX 0xFFFFFFFFFFFFFFFFL
+#endif
+#ifndef UINT32_MAX
 #define UINT32_MAX 0xFFFFFFFF
+#endif
+#ifndef UINT16_MAX
 #define UINT16_MAX 0xFFFF
+#endif
+#ifndef UINT8_MAX
 #define UINT8_MAX  0xFF
+#endif
+#ifndef INT64_MAX
 #define INT64_MAX  0x7FFFFFFFFFFFFFFFL
+#endif
+#ifndef INT64_MIN
 #define INT64_MIN  ((-INT64_MAX)-1)
+#endif
+#ifndef INT32_MAX
 #define INT32_MAX  0x7FFFFFFF
+#endif
+#ifndef INT32_MIN
 #define INT32_MIN  ((-INT32_MAX)-1)
+#endif
+#ifndef INT16_MAX
 #define INT16_MAX  0x7FFF
+#endif
+#ifndef INT16_MIN
 #define INT16_MIN  ((-INT16_MAX)-1)
+#endif
+#ifndef INT8_MAX
 #define INT8_MAX   0x7F
+#endif
+#ifndef INT8_MIN
 #define INT8_MIN   ((-INT8_MAX)-1)
+#endif
 
 typedef uint64 FilePos;
 typedef uint32 BufLen;

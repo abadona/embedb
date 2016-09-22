@@ -111,6 +111,7 @@ class VStorage_imp : public VStorage
         RecLocator prevfree_;
         RecLocator nextfree_;
     };
+    /*
     struct Block
     {
         BlockHdr hdr_;
@@ -120,6 +121,7 @@ class VStorage_imp : public VStorage
             char data_ [];
         };
     };
+    */
 
 #ifdef _MSC_VER
 #pragma warning (pop)
